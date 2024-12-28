@@ -5,6 +5,7 @@ from aiogram import Router, F, types
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, URLInputFile
+from aiogram.utils.chat_action import ChatActionSender
 
 from src.keyboards import (
     get_menu_keyboard, get_gravity_keyboard,
@@ -159,6 +160,7 @@ async def set_text_color(message: Message, state: FSMContext):
 
 @router.message(AddTextToImageState.additional_menu_step, F.text.lower() == "получить изображение")
 async def send_new_photo(message: Message, state: FSMContext):
+    await message.answer("Начинаю обработку фотографии")
     data = await state.get_data()
     photo_id = data["photo_id"]
 
@@ -167,18 +169,20 @@ async def send_new_photo(message: Message, state: FSMContext):
     downloaded_file = await message.bot.download_file(file_path)
     await state.clear()
 
-    with tempfile.NamedTemporaryFile(
-            delete=True, suffix=".jpg",
-            dir=tempfile.gettempdir()) as temp_file:
-        temp_file_path = temp_file.name
+    async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
+        with tempfile.NamedTemporaryFile(
+                delete=True, suffix=".jpg",
+                dir=tempfile.gettempdir()) as temp_file:
+            temp_file_path = temp_file.name
 
-        with open(temp_file_path, "wb") as f:
-            read_file = await asyncio.to_thread(downloaded_file.read)
-            await asyncio.to_thread(f.write, read_file)
+            with open(temp_file_path, "wb") as f:
+                read_file = await asyncio.to_thread(downloaded_file.read)
+                await asyncio.to_thread(f.write, read_file)
 
-        new_photo = await asyncio.to_thread(
-            add_text_to_image, temp_file_path, **data
-        )
+            new_photo = await asyncio.to_thread(
+                add_text_to_image, temp_file_path, **data
+            )
+
         bot_info = await message.bot.get_me()
         await message.reply_photo(
             photo=URLInputFile(new_photo),
