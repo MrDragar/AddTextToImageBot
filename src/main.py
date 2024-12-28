@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher
 
 from src.handlers import router
 from src import config
+from src.services import init_cloudinary
 
 
 async def main():
@@ -16,6 +17,10 @@ async def main():
     bot = Bot(token=config.API_TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
+    await init_cloudinary(
+        cloud_name=config.CLOUD_NAME, api_key=config.CLOUDINARY_API_SECRET,
+        api_secret=config.CLOUDINARY_API_SECRET
+    )
     await bot.delete_webhook()
     await dp.start_polling(bot)
 

@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 API_TOKEN = os.getenv("API_TOKEN")
-CHATGPT_API_KEY = os.getenv("CHATGPT_API_KEY")
 HTTPS_PROXY = os.getenv("HTTPS_PROXY")
+CLOUD_NAME = os.getenv("CLOUD_NAME")
+CLOUDINARY_CONFIG = os.getenv("CLOUDINARY_CONFIG")
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
 
 log_level = os.getenv("LOG_LEVEL", "INFO")
 log_file = os.getenv("LOG_FILE", None)
