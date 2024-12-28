@@ -3,11 +3,12 @@ import asyncio
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, URLInputFile
 
 import tempfile
 
 from src.states import AddTextToImageState
+from src.services import add_text_to_image
 
 
 router = Router()
@@ -50,4 +51,10 @@ async def get_text(message: Message, state: FSMContext):
         with open(temp_file_path, "wb") as f:
             read_file = await asyncio.to_thread(downloaded_file.read)
             await asyncio.to_thread(f.write, read_file)
+
+        new_photo = await asyncio.to_thread(
+            add_text_to_image, temp_file_path, message.text
+        )
+        bot_info = await message.bot.get_me()
+        await message.reply_photo(photo=URLInputFile(new_photo), caption=f"Изменено с помощью @{bot_info.username}")
 

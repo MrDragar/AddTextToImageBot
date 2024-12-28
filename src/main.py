@@ -17,8 +17,8 @@ async def main():
     bot = Bot(token=config.API_TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
-    await init_cloudinary(
-        cloud_name=config.CLOUD_NAME, api_key=config.CLOUDINARY_API_SECRET,
+    init_cloudinary(
+        cloud_name=config.CLOUD_NAME, api_key=config.CLOUDINARY_API_KEY,
         api_secret=config.CLOUDINARY_API_SECRET
     )
     await bot.delete_webhook()
