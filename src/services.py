@@ -13,6 +13,16 @@ GRAVITY_TRANSLATIONS = {
 }
 
 
+COLOR_TRANSLATIONS = {
+    "Красный": "red",
+    "Зеленый": "green",
+    "Синий": "blue",
+    "Желтый": "yellow",
+    "Черный": "black",
+    "Белый": "white",
+}
+
+
 def init_cloudinary(cloud_name: str, api_key: str, api_secret: str):
     cloudinary.config(
         cloud_name=cloud_name, api_key=api_key, api_secret=api_secret
@@ -20,16 +30,16 @@ def init_cloudinary(cloud_name: str, api_key: str, api_secret: str):
 
 
 def add_text_to_image(
-        image_path: str, text: str, font_size: int = 50,
+        image_path: str, text: str, font_size: int = 90,
         gravity: str = "center", font_family: str = "Arial",
-        **extra
+        text_color: str = "black", **extra
 ) -> str:
-    logging.debug(f"{image_path}, {text}")
+    logging.debug(f"{image_path}, {text}, {font_size}, {gravity}, {font_family}, {text_color}")
     response = cloudinary.uploader.upload(
         image_path,
         transformation=[
             {"overlay": {"font_family": font_family, "font_size": font_size,
-                         "text": text}},
+                         "text": text}, "color": text_color},
             {"flags": "layer_apply", "gravity": gravity, "y": 0}
         ]
     )

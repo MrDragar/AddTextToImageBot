@@ -8,3 +8,4 @@ class AddTextToImageState(StatesGroup):
     get_font_size_step = State()
     get_gravity_step = State()
     get_font_family = State()
+    get_text_color_step = State()

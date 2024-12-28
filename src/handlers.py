@@ -1,16 +1,18 @@
 import asyncio
+import tempfile
 
 from aiogram import Router, F, types
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, URLInputFile
 
-import tempfile
-
+from src.keyboards import (
+    get_menu_keyboard, get_gravity_keyboard,
+    get_font_family_keyboard, get_color_keyboard,
+)
+from src.services import add_text_to_image, GRAVITY_TRANSLATIONS, \
+    COLOR_TRANSLATIONS
 from src.states import AddTextToImageState
-from src.services import add_text_to_image, GRAVITY_TRANSLATIONS
-from src.keyboards import get_menu_keyboard, get_gravity_keyboard, get_font_family_keyboard
-
 
 router = Router()
 file_id_storage: dict[str, str] = {}
@@ -129,6 +131,30 @@ async def set_font_courier_new(message: Message, state: FSMContext):
 async def font_family_back(message: Message, state: FSMContext):
     await message.reply("Выберите пункт меню", reply_markup=get_menu_keyboard())
     await state.set_state(AddTextToImageState.additional_menu_step)
+
+
+@router.message(AddTextToImageState.additional_menu_step, F.text.lower() == "поменять цвет текста")
+async def change_text_color(message: Message, state: FSMContext):
+    await message.reply("Выберите цвет текста", reply_markup=get_color_keyboard())
+    await state.set_state(AddTextToImageState.get_text_color_step)
+
+
+@router.message(AddTextToImageState.get_text_color_step, F.text.lower() == "назад")
+async def text_color_back(message: Message, state: FSMContext):
+    await message.reply("Выберите пункт меню", reply_markup=get_menu_keyboard())
+    await state.set_state(AddTextToImageState.additional_menu_step)
+
+
+@router.message(AddTextToImageState.get_text_color_step, F.text)
+async def set_text_color(message: Message, state: FSMContext):
+    color_ru = message.text
+    if color_ru in COLOR_TRANSLATIONS:
+        color_en = COLOR_TRANSLATIONS[color_ru]
+        await state.update_data({"text_color": color_en})
+        await message.reply(f"Цвет текста изменён на '{color_ru}'. Выберите пункт меню", reply_markup=get_menu_keyboard())
+        await state.set_state(AddTextToImageState.additional_menu_step)
+    else:
+        await message.reply("Пожалуйста, выберите корректный цвет из списка.")
 
 
 @router.message(AddTextToImageState.additional_menu_step, F.text.lower() == "получить изображение")
